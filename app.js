@@ -17,8 +17,16 @@ app.use(express.urlencoded({ extended: false }));
 app.put('/api/user/login/', (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
-
+  
   resp = validate_existence(email, 'Email');
+  if (resp !== true) {
+    return res.status(404).send({
+      status: 'failure',
+      reason: resp
+    });
+  }
+  // input, min_length, max_length, field_display_name
+  resp = validate_length(password,10,15,"xyz");
   if (resp !== true) {
     return res.status(400).send({
       status: 'failure',
@@ -69,15 +77,20 @@ app.put('/api/user/change-password/', (req, res) => {
   var password = req.body.password;
   var confirm_password = req.body.confirm_password;
   var auth_token = req.get('auth-token');
-
   resp = validate_existence(auth_token, 'Auth token');
+  if (resp !== true) {
+    return res.status(404).send({
+      status: 'failure',
+      reason: resp
+    });
+  }
+  resp = validate_length(password,10,15,"xyz");
   if (resp !== true) {
     return res.status(400).send({
       status: 'failure',
       reason: resp
     });
   }
-
   resp = validate_password(password, 'Password');
   if (resp !== true) {
     return res.status(400).send({
