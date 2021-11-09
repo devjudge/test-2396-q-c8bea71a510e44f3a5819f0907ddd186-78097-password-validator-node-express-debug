@@ -17,22 +17,29 @@ app.use(express.urlencoded({ extended: false }));
 app.put('/api/user/login/', (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
-  
-  resp = validate_existence(email, 'Email');
-  if (resp !== true) {
-    return res.status(404).send({
+  console.log(email,password);
+  if(email===undefined || password===undefined)
+    return res.status(400).send({
       status: 'failure',
-      reason: resp
+      reason: "sdas"
     });
-  }
-  // input, min_length, max_length, field_display_name
-  resp = validate_length(password,10,15,"xyz");
+  
+ let resp = validate_length(password,10,15,"xyz");
   if (resp !== true) {
     return res.status(400).send({
       status: 'failure',
       reason: resp
     });
   }
+  
+   resp = validate_existence(email, 'Email');
+  if (resp !== true) {
+    return res.status(400).send({
+      status: 'failure',
+      reason: resp
+    });
+  }
+  // input, min_length, max_length, field_display_name
 
   resp = validate_password(password, 'Password');
   if (resp !== true) {
@@ -74,12 +81,13 @@ app.put('/api/user/login/', (req, res) => {
 
 
 app.put('/api/user/change-password/', (req, res) => {
+  console.log(req);
   var password = req.body.password;
   var confirm_password = req.body.confirm_password;
   var auth_token = req.get('auth-token');
   resp = validate_existence(auth_token, 'Auth token');
   if (resp !== true) {
-    return res.status(404).send({
+    return res.status(400).send({
       status: 'failure',
       reason: resp
     });
@@ -153,7 +161,22 @@ var validate_length = function(input, min_length, max_length, field_display_name
   if (input.length < min_length || input.length > max_length) {
     return field_display_name + ' must be of minimum ' + min_length + ' characters and maximum ' + max_length + ' characters!';      
   }
-  return true;
+  let x = 0
+  let y = 0
+  
+  for(let i=0;i<input.length;i++){
+    if(input[i].charCodeAt(0)>=48 && input[i].charCodeAt(0)>58 && x<1){
+      x++
+    } 
+    if(input[i].charCodeAt(0)>64 && input[i].charCodeAt(0)<=122 && y<1){
+      y++
+    }
+    if(input[i]=='@'||input[i]=='#'||input[i]=='$'||input[i]=='%'||input[i]=='-'){
+return false
+    }
+  }
+  if(x+y == 2) return true
+  else  return false;
 };
 
 var validate_password = function(input, field_display_name) {
